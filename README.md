@@ -45,4 +45,4 @@ Create the challenge:
 
 ## Some demo
 
-![](./20230907-1544-12.9221384.mp4)
+![](./demo.gif)
