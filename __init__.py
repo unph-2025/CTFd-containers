@@ -193,7 +193,7 @@ def load(app: Flask):
         except ContainerException:
             return {"error": "Database error occurred, please try again."}
 
-        return {"success": "Container renewed", "expires": running_container.expires}
+        return {"success": "Container renewed", "expires": running_container.expires, "hostname": container_manager.settings.get("docker_hostname", ""), "port": running_container.port,}
 
     def create_container(chal_id, team_id):
         # Get the requested challenge
@@ -268,6 +268,67 @@ def load(app: Flask):
             "port": port,
             "expires": expires
         })
+
+    def view_container_info(chal_id, team_id):
+        # Get the requested challenge
+        challenge = ContainerChallenge.challenge_model.query.filter_by(
+            id=chal_id).first()
+
+        # Make sure the challenge exists and is a container challenge
+        if challenge is None:
+            return {"error": "Challenge not found"}, 400
+
+        # Check for any existing containers for the team
+        running_containers = ContainerInfoModel.query.filter_by(
+            challenge_id=challenge.id, team_id=team_id)
+        running_container = running_containers.first()
+
+        # If a container is already running for the team, return it
+        if running_container:
+            # Check if Docker says the container is still running before returning it
+            try:
+                if container_manager.is_container_running(
+                        running_container.container_id):
+                    return json.dumps({
+                        "status": "already_running",
+                        "hostname": container_manager.settings.get("docker_hostname", ""),
+                        "port": running_container.port,
+                        "expires": running_container.expires
+                    })
+                else:
+                    # Container is not running, it must have died or been killed,
+                    # remove it from the database and create a new one
+                    running_containers.delete()
+                    db.session.commit()
+            except ContainerException as err:
+                return {"error": str(err)}, 500
+        else:
+            return {"status": "Challenge not started"}
+
+    @containers_bp.route('/api/view_info', methods=['POST'])
+    @authed_only
+    @during_ctf_time_only
+    @require_verified_emails
+    @ratelimit(method="POST", limit=15, interval=60)
+    def route_view_info():
+        user = get_current_user()
+
+        # Validate the request
+        if request.json is None:
+            return {"error": "Invalid request"}, 400
+
+        if request.json.get("chal_id", None) is None:
+            return {"error": "No chal_id specified"}, 400
+
+        if user is None:
+            return {"error": "User not found"}, 400
+        if user.team is None:
+            return {"error": "User not a member of a team"}, 400
+
+        try:
+            return view_container_info(request.json.get("chal_id"), user.team.id)
+        except ContainerException as err:
+            return {"error": str(err)}, 500
 
     @containers_bp.route('/api/request', methods=['POST'])
     @authed_only
