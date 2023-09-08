@@ -617,6 +617,66 @@ def load(app: Flask):
 
         return render_template('container_dashboard.html', containers=running_containers, connected=connected)
 
+    @containers_bp.route('/api/running_containers', methods=['GET'])
+    @admins_only
+    def route_get_running_containers():
+        running_containers = ContainerInfoModel.query.order_by(
+            ContainerInfoModel.timestamp.desc()).all()
+
+        connected = False
+        try:
+            connected = container_manager.is_connected()
+        except ContainerException:
+            pass
+
+        # Create lists to store unique teams and challenges
+        unique_teams = set()
+        unique_challenges = set()
+
+        for i, container in enumerate(running_containers):
+            try:
+                running_containers[i].is_running = container_manager.is_container_running(
+                    container.container_id)
+            except ContainerException:
+                running_containers[i].is_running = False
+
+            # Add team and challenge to the unique sets
+            unique_teams.add(f"{container.team.name} [{container.team_id}]")
+            unique_challenges.add(f"{container.challenge.name} [{container.challenge_id}]")
+
+        # Convert unique sets to lists
+        unique_teams_list = list(unique_teams)
+        unique_challenges_list = list(unique_challenges)
+
+        # Create a list of dictionaries containing running_containers data
+        running_containers_data = []
+        for container in running_containers:
+            container_data = {
+                "container_id": container.container_id,
+                "image": container.challenge.image,
+                "challenge": f"{container.challenge.name} [{container.challenge_id}]",
+                "team": f"{container.team.name} [{container.team_id}]",
+                "port": container.port,
+                "created": container.timestamp,
+                "expires": container.expires,
+                "is_running": container.is_running
+            }
+            running_containers_data.append(container_data)
+
+        # Create a JSON response containing running_containers_data, unique teams, and unique challenges
+        response_data = {
+            "containers": running_containers_data,
+            "connected": connected,
+            "teams": unique_teams_list,
+            "challenges": unique_challenges_list
+        }
+
+        # Return the JSON response
+        return json.dumps(response_data)
+
+
+
+
     @containers_bp.route('/settings', methods=['GET'])
     @admins_only
     def route_containers_settings():
