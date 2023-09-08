@@ -26,3 +26,42 @@ xhr.onload = function () {
 	}
 	console.log(data);
 };
+
+
+var currentURL = window.location.href;
+var match = currentURL.match(/\/challenges\/(\d+)/);
+
+if (match && match[1]) {
+    var challenge_id = parseInt(match[1]);
+
+    var connectType = document.getElementById("connect-type");
+    var connectTypeDefault = document.getElementById("connect-type-default");
+
+    var connectTypeEndpoint = "/containers/api/get_connect_type/" + challenge_id;
+
+    fetch(connectTypeEndpoint, {
+        method: "GET",
+        headers: {
+            "Accept": "application/json",
+            "CSRF-Token": init.csrfNonce
+        }
+    })
+    .then(response => response.json())
+    .then(connectTypeData => {
+        if (connectTypeData.error !== undefined) {
+            console.error("Error:", connectTypeData.error);
+        } else {
+            var connectTypeValue = connectTypeData.connect;
+
+            connectTypeDefault.innerHTML = "Choose...";
+            connectType.removeAttribute("disabled");
+            connectType.value = connectTypeValue;
+        }
+        console.log(connectTypeData);
+    })
+    .catch(error => {
+        console.error("Fetch error:", error);
+    });
+} else {
+    console.error("Challenge ID not found in the URL.");
+}

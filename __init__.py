@@ -309,6 +309,31 @@ def load(app: Flask):
         else:
             return {"status": "Challenge not started"}
 
+    def connect_type(chal_id):
+        # Get the requested challenge
+        challenge = ContainerChallenge.challenge_model.query.filter_by(
+            id=chal_id).first()
+
+        # Make sure the challenge exists and is a container challenge
+        if challenge is None:
+            return {"error": "Challenge not found"}, 400
+
+        return json.dumps({
+                        "status": "Ok",
+                        "connect": challenge.ctype
+                    })
+
+    @containers_bp.route('/api/get_connect_type/<int:challenge_id>', methods=['GET'])
+    @authed_only
+    @during_ctf_time_only
+    @require_verified_emails
+    @ratelimit(method="GET", limit=15, interval=60)
+    def get_connect_type(challenge_id):
+        try:
+            return connect_type(challenge_id)
+        except ContainerException as err:
+            return {"error": str(err)}, 500
+
     @containers_bp.route('/api/view_info', methods=['POST'])
     @authed_only
     @during_ctf_time_only
