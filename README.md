@@ -27,6 +27,7 @@ Add plugin to CTFd:
 
 Connect to Docker daemon:
 - If the CTFd and the challenges host in the same machine, you just need to go to the plugin page in admin page, click on `Settings`, on this page just fill in other fields except the `Base URL` field.
+
 ![](https://cdn.discordapp.com/attachments/1120761462600777869/1149367147231985714/image.png)
 
 - If you host the CTFd and the challenges in different machines, you need to follow the instructions one that page
@@ -34,6 +35,7 @@ Connect to Docker daemon:
 Create the challenge:
 
 - Select container type and fill all the required fields
+
 ![](https://cdn.discordapp.com/attachments/1120761462600777869/1149367426241273876/image.png)
 
 ![](https://cdn.discordapp.com/attachments/1120761462600777869/1149367639345463316/image.png)
@@ -44,5 +46,9 @@ Create the challenge:
 
 
 ## Some demo
+
+![](https://cdn.discordapp.com/attachments/1120761462600777869/1149556744679325736/image.png)
+
+![](https://cdn.discordapp.com/attachments/1120761462600777869/1149556787364777994/image.png)
 
 ![](./demo.gif)

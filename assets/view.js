@@ -87,11 +87,17 @@ function createChallengeLinkElement(data, parent) {
 	parent.append(expires); 
 	parent.append(document.createElement('br'));
 
-	let link = document.createElement('a');
-	link.href = 'http://' + data.hostname + ":" + data.port;
-	link.textContent = data.hostname + ":" + data.port;
-	link.target = '_blank'
-	parent.append(link);
+	if (data.connect == "tcp") {
+		let codeElement = document.createElement('code');
+		codeElement.textContent = 'nc ' + data.hostname + " " + data.port;
+		parent.append(codeElement);
+	} else {
+		let link = document.createElement('a');
+		link.href = 'http://' + data.hostname + ":" + data.port;
+		link.textContent = 'http://' + data.hostname + ":" + data.port;
+		link.target = '_blank'
+		parent.append(link);
+	}
 }
 
 function view_container_info(challenge_id){

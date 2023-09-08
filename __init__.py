@@ -35,7 +35,7 @@ class ContainerChallenge(BaseChallenge):
     route = "/plugins/containers/assets/"
 
     challenge_model = ContainerChallengeModel
-
+    
     @classmethod
     def read(cls, challenge):
         """
@@ -51,6 +51,7 @@ class ContainerChallenge(BaseChallenge):
             "image": challenge.image,
             "port": challenge.port,
             "command": challenge.command,
+            "ctype": challenge.ctype,
             "initial": challenge.initial,
             "decay": challenge.decay,
             "minimum": challenge.minimum,
@@ -193,7 +194,7 @@ def load(app: Flask):
         except ContainerException:
             return {"error": "Database error occurred, please try again."}
 
-        return {"success": "Container renewed", "expires": running_container.expires, "hostname": container_manager.settings.get("docker_hostname", ""), "port": running_container.port,}
+        return {"success": "Container reneweda", "expires": running_container.expires, "hostname": container_manager.settings.get("docker_hostname", ""), "port": running_container.port, "connect": challenge.ctype}
 
     def create_container(chal_id, team_id):
         # Get the requested challenge
@@ -219,6 +220,7 @@ def load(app: Flask):
                         "status": "already_running",
                         "hostname": container_manager.settings.get("docker_hostname", ""),
                         "port": running_container.port,
+                        "connect": challenge.ctype,
                         "expires": running_container.expires
                     })
                 else:
@@ -266,6 +268,7 @@ def load(app: Flask):
             "status": "created",
             "hostname": container_manager.settings.get("docker_hostname", ""),
             "port": port,
+            "connect": challenge.ctype,
             "expires": expires
         })
 
@@ -293,6 +296,7 @@ def load(app: Flask):
                         "status": "already_running",
                         "hostname": container_manager.settings.get("docker_hostname", ""),
                         "port": running_container.port,
+                        "connect": challenge.ctype,
                         "expires": running_container.expires
                     })
                 else:

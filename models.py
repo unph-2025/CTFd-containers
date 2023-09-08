@@ -14,6 +14,7 @@ class ContainerChallengeModel(Challenges):
     port = db.Column(db.Integer)
     command = db.Column(db.Text, default="")
     volumes = db.Column(db.Text, default="")
+    ctype = db.Column(db.Text)
 
     # Dynamic challenge properties
     initial = db.Column(db.Integer, default=0)
@@ -40,7 +41,6 @@ class ContainerInfoModel(db.Model):
     team = relationship("Teams", foreign_keys=[team_id])
     challenge = relationship(ContainerChallengeModel,
                              foreign_keys=[challenge_id])
-
 
 class ContainerSettingsModel(db.Model):
     __mapper_args__ = {"polymorphic_identity": "container_settings"}

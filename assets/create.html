@@ -50,6 +50,21 @@
 
 <div class="form-group">
 	<label>
+		Connect type<br>
+		<small class="form-text text-muted">
+			Connect via web or tcp
+		</small>
+	</label>
+	<select type="text" class="form-control" name="ctype" placeholder="Connect via" id="connect-type"
+		title="Connect via web or tcp" required>
+		<option value="" selected disabled>Choose a value...</option>
+		<option value="web">Web</option>
+		<option value="tcp">TCP</option>
+	</select>
+</div>
+
+<div class="form-group">
+	<label>
 		Port<br>
 		<small class="form-text text-muted">
 			Internal container port that should be exposed (external port will be automatically assigned)
