@@ -100,117 +100,140 @@ function createChallengeLinkElement(data, parent) {
 	}
 }
 
-function view_container_info(challenge_id){
-	let alert = resetAlert();
+function view_container_info(challenge_id) {
+    let alert = resetAlert();
+    var path = "/containers/api/view_info";
 
-	var path = "/containers/api/view_info";
-
-	var xhr = new XMLHttpRequest();
-	xhr.open("POST", path, true);
-	xhr.setRequestHeader("Content-Type", "application/json");
-	xhr.setRequestHeader("Accept", "application/json");
-	xhr.setRequestHeader("CSRF-Token", init.csrfNonce);
-	xhr.send(JSON.stringify({ chal_id: challenge_id }));
-	xhr.onload = function () {
-		var data = JSON.parse(this.responseText);
-		if (data.status == "Challenge not started") {
-			alert.append(data.status)
+    fetch(path, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "CSRF-Token": init.csrfNonce
+        },
+        body: JSON.stringify({ chal_id: challenge_id })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status == "Challenge not started") {
+            alert.append(data.status);
             toggleChallengeCreate();
-		} else {
-			// Success
+        } else {
+            // Success
             createChallengeLinkElement(data, alert);
             toggleChallengeUpdate();
-		}
-		console.log(data);
-	};
+        }
+        console.log(data);
+    })
+    .catch(error => {
+        console.error("Fetch error:", error);
+    });
 }
 
-function container_request(challenge_id) {
-	var path = "/containers/api/request";
-	let alert = resetAlert();
 
-	var xhr = new XMLHttpRequest();
-	xhr.open("POST", path, true);
-	xhr.setRequestHeader("Content-Type", "application/json");
-	xhr.setRequestHeader("Accept", "application/json");
-	xhr.setRequestHeader("CSRF-Token", init.csrfNonce);
-	xhr.send(JSON.stringify({ chal_id: challenge_id }));
-	xhr.onload = function () {
-		var data = JSON.parse(this.responseText);
-		if (data.error !== undefined) {
-			// Container error
-			alert.append(data.error)
-			toggleChallengeCreate();
-		} else if (data.message !== undefined) {
-			// CTFd error
-			alert.append(data.message)
-			toggleChallengeCreate();
-		} else {
-			// Success
+function container_request(challenge_id) {
+    var path = "/containers/api/request";
+    let alert = resetAlert();
+
+    fetch(path, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "CSRF-Token": init.csrfNonce
+        },
+        body: JSON.stringify({ chal_id: challenge_id })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error !== undefined) {
+            // Container error
+            alert.append(data.error);
+            toggleChallengeCreate();
+        } else if (data.message !== undefined) {
+            // CTFd error
+            alert.append(data.message);
+            toggleChallengeCreate();
+        } else {
+            // Success
             createChallengeLinkElement(data, alert);
             toggleChallengeUpdate();
             toggleChallengeCreate();
         }
-		console.log(data);
-	};
+        console.log(data);
+    })
+    .catch(error => {
+        console.error("Fetch error:", error);
+    });
 }
 
 function container_renew(challenge_id) {
-	var path = "/containers/api/renew";
+    var path = "/containers/api/renew";
+    let alert = resetAlert();
 
-	let alert = resetAlert();
-
-	var xhr = new XMLHttpRequest();
-	xhr.open("POST", path, true);
-	xhr.setRequestHeader("Content-Type", "application/json");
-	xhr.setRequestHeader("Accept", "application/json");
-	xhr.setRequestHeader("CSRF-Token", init.csrfNonce);
-	xhr.send(JSON.stringify({ chal_id: challenge_id }));
-	xhr.onload = function () {
-		var data = JSON.parse(this.responseText);
-		if (data.error !== undefined) {
-			// Container rrror
-			alert.append(data.error)
-			toggleChallengeCreate();
-		} else if (data.message !== undefined) {
-			// CTFd error
-			alert.append(data.message)
-			toggleChallengeCreate();
-		} else {
-			// Success
-			createChallengeLinkElement(data, alert);
-		}
-		console.log(data);
-	};
+    fetch(path, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "CSRF-Token": init.csrfNonce
+        },
+        body: JSON.stringify({ chal_id: challenge_id })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error !== undefined) {
+            // Container error
+            alert.append(data.error);
+            toggleChallengeCreate();
+        } else if (data.message !== undefined) {
+            // CTFd error
+            alert.append(data.message);
+            toggleChallengeCreate();
+        } else {
+            // Success
+            createChallengeLinkElement(data, alert);
+        }
+        console.log(data);
+    })
+    .catch(error => {
+        console.error("Fetch error:", error);
+    });
 }
 
 function container_stop(challenge_id) {
-	var path = "/containers/api/stop";
+    var path = "/containers/api/stop";
+    let alert = resetAlert();
 
-	let alert = resetAlert();
-
-	var xhr = new XMLHttpRequest();
-	xhr.open("POST", path, true);
-	xhr.setRequestHeader("Content-Type", "application/json");
-	xhr.setRequestHeader("Accept", "application/json");
-	xhr.setRequestHeader("CSRF-Token", init.csrfNonce);
-	xhr.send(JSON.stringify({ chal_id: challenge_id }));
-	xhr.onload = function () {
-		var data = JSON.parse(this.responseText);
-		if (data.error !== undefined) {
-			// Container error
-			alert.append(data.error)
-			toggleChallengeCreate();
-		} else if (data.message !== undefined) {
-			// CTFd error
-			alert.append(data.message)
-			toggleChallengeCreate();
-		} else {
-			// Success
-			alert.append("Challenge Terminated.")
+    fetch(path, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "CSRF-Token": init.csrfNonce
+        },
+        body: JSON.stringify({ chal_id: challenge_id })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error !== undefined) {
+            // Container error
+            alert.append(data.error);
+            toggleChallengeCreate();
+        } else if (data.message !== undefined) {
+            // CTFd error
+            alert.append(data.message);
+            toggleChallengeCreate();
+        } else {
+            // Success
+            alert.append("Challenge Terminated.");
             toggleChallengeCreate();
             toggleChallengeUpdate();
-		}
-		console.log(data);
-	};
+        }
+        console.log(data);
+    })
+    .catch(error => {
+        console.error("Fetch error:", error);
+    });
 }
+
