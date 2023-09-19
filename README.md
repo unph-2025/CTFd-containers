@@ -1,6 +1,6 @@
 # CTFd Docker Containers Plugin
 
-This CTFd plugin allows you to run ephemeral Docker containers for specific challenges. Teams can request a container to use as needed, and its lifecycle will be managed by the plugin.
+This is a modified version of CTFd Docker Containers Plugin by [andyjsmith](https://github.com/andyjsmith). The original version can be found here [andyjsmith/CTFd-Docker-Plugin](https://github.com/andyjsmith/CTFd-Docker-Plugin)
 
 ## Installation
 
