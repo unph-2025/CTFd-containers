@@ -13,10 +13,13 @@ from CTFd.plugins.challenges import CHALLENGE_CLASSES, BaseChallenge
 from CTFd.utils.decorators import authed_only, admins_only, during_ctf_time_only, ratelimit, require_verified_emails
 from CTFd.utils.user import get_current_user
 from CTFd.utils.modes import get_model
+from CTFd.utils import get_config
 
 from .models import ContainerChallengeModel, ContainerInfoModel, ContainerSettingsModel
 from .container_manager import ContainerManager, ContainerException
 
+USERS_MODE = "users"
+TEAMS_MODE = "teams"
 
 class ContainerChallenge(BaseChallenge):
     id = "container"  # Unique identifier used to register challenges
@@ -137,6 +140,14 @@ def settings_to_dict(settings):
         setting.key: setting.value for setting in settings
     }
 
+def is_team_mode():
+    mode = get_config("user_mode")
+    if mode == TEAMS_MODE:
+        return True
+    elif mode == USERS_MODE:
+        return False
+    else:
+        return None
 
 def load(app: Flask):
     app.db.create_all()
@@ -351,11 +362,14 @@ def load(app: Flask):
 
         if user is None:
             return {"error": "User not found"}, 400
-        if user.team is None:
+        if user.team is None and is_team_mode() is True:
             return {"error": "User not a member of a team"}, 400
 
         try:
-            return view_container_info(request.json.get("chal_id"), user.team.id)
+            if is_team_mode() is True:
+                return view_container_info(request.json.get("chal_id"), user.team.id)
+            elif is_team_mode() is False:
+                return view_container_info(request.json.get("chal_id"), user.id)
         except ContainerException as err:
             return {"error": str(err)}, 500
 
@@ -376,11 +390,14 @@ def load(app: Flask):
 
         if user is None:
             return {"error": "User not found"}, 400
-        if user.team is None:
+        if user.team is None and is_team_mode() is True:
             return {"error": "User not a member of a team"}, 400
 
         try:
-            return create_container(request.json.get("chal_id"), user.team.id)
+            if is_team_mode() is True:
+                return create_container(request.json.get("chal_id"), user.team.id)
+            elif is_team_mode() is False:
+                return create_container(request.json.get("chal_id"), user.id)   
         except ContainerException as err:
             return {"error": str(err)}, 500
 
@@ -401,11 +418,14 @@ def load(app: Flask):
 
         if user is None:
             return {"error": "User not found"}, 400
-        if user.team is None:
+        if user.team is None and is_team_mode() is True:
             return {"error": "User not a member of a team"}, 400
 
         try:
-            return renew_container(request.json.get("chal_id"), user.team.id)
+            if is_team_mode() is True:
+                return renew_container(request.json.get("chal_id"), user.team.id)
+            elif is_team_mode() is False:
+                return renew_container(request.json.get("chal_id"), user.id)
         except ContainerException as err:
             return {"error": str(err)}, 500
 
@@ -426,16 +446,25 @@ def load(app: Flask):
 
         if user is None:
             return {"error": "User not found"}, 400
-        if user.team is None:
+        if user.team is None and is_team_mode() is True:
             return {"error": "User not a member of a team"}, 400
 
-        running_container: ContainerInfoModel = ContainerInfoModel.query.filter_by(
-            challenge_id=request.json.get("chal_id"), team_id=user.team.id).first()
+        if is_team_mode() is True:
+            running_container: ContainerInfoModel = ContainerInfoModel.query.filter_by(
+                challenge_id=request.json.get("chal_id"), team_id=user.team.id).first()
 
-        if running_container:
-            kill_container(running_container.container_id)
+            if running_container:
+                kill_container(running_container.container_id)
 
-        return create_container(request.json.get("chal_id"), user.team.id)
+            return create_container(request.json.get("chal_id"), user.team.id)
+        elif is_team_mode() is False:
+            running_container: ContainerInfoModel = ContainerInfoModel.query.filter_by(
+                challenge_id=request.json.get("chal_id"), team_id=user.id).first()
+
+            if running_container:
+                kill_container(running_container.container_id)
+
+            return create_container(request.json.get("chal_id"), user.id)
 
     @containers_bp.route('/api/stop', methods=['POST'])
     @authed_only
@@ -454,16 +483,26 @@ def load(app: Flask):
 
         if user is None:
             return {"error": "User not found"}, 400
-        if user.team is None:
+        if user.team is None and is_team_mode() is True:
             return {"error": "User not a member of a team"}, 400
 
-        running_container: ContainerInfoModel = ContainerInfoModel.query.filter_by(
-            challenge_id=request.json.get("chal_id"), team_id=user.team.id).first()
+        if is_team_mode() is True:
+            running_container: ContainerInfoModel = ContainerInfoModel.query.filter_by(
+                challenge_id=request.json.get("chal_id"), team_id=user.team.id).first()
 
-        if running_container:
-            return kill_container(running_container.container_id)
+            if running_container:
+                return kill_container(running_container.container_id)
 
-        return {"error": "No container found"}, 400
+            return {"error": "No container found"}, 400
+        elif is_team_mode() is False:
+            running_container: ContainerInfoModel = ContainerInfoModel.query.filter_by(
+                challenge_id=request.json.get("chal_id"), team_id=user.id).first()
+
+            if running_container:
+                return kill_container(running_container.container_id)
+
+            return {"error": "No container found"}, 400
+
 
     @containers_bp.route('/api/kill', methods=['POST'])
     @admins_only
@@ -673,8 +712,6 @@ def load(app: Flask):
 
         # Return the JSON response
         return json.dumps(response_data)
-
-
 
 
     @containers_bp.route('/settings', methods=['GET'])
