@@ -182,7 +182,7 @@ def load(app: Flask):
         db.session.commit()
         return {"success": "Container killed"}
 
-    def renew_container(chal_id, team_id):
+    def renew_container(chal_id, xid, is_team):
         # Get the requested challenge
         challenge = ContainerChallenge.challenge_model.query.filter_by(
             id=chal_id).first()
@@ -191,8 +191,12 @@ def load(app: Flask):
         if challenge is None:
             return {"error": "Challenge not found"}, 400
 
-        running_containers = ContainerInfoModel.query.filter_by(
-            challenge_id=challenge.id, team_id=team_id)
+        if is_team is True:
+            running_containers = ContainerInfoModel.query.filter_by(
+            challenge_id=challenge.id, team_id=xid)
+        else:
+            running_containers = ContainerInfoModel.query.filter_by(
+            challenge_id=challenge.id, user_id=xid)
         running_container = running_containers.first()
 
         if running_container is None:
@@ -207,7 +211,7 @@ def load(app: Flask):
 
         return {"success": "Container reneweda", "expires": running_container.expires, "hostname": container_manager.settings.get("docker_hostname", ""), "port": running_container.port, "connect": challenge.ctype}
 
-    def create_container(chal_id, team_id):
+    def create_container(chal_id, xid, is_team):
         # Get the requested challenge
         challenge = ContainerChallenge.challenge_model.query.filter_by(
             id=chal_id).first()
@@ -217,8 +221,12 @@ def load(app: Flask):
             return {"error": "Challenge not found"}, 400
 
         # Check for any existing containers for the team
-        running_containers = ContainerInfoModel.query.filter_by(
-            challenge_id=challenge.id, team_id=team_id)
+        if is_team is True:
+            running_containers = ContainerInfoModel.query.filter_by(
+                challenge_id=challenge.id, team_id=xid)
+        else:
+            running_containers = ContainerInfoModel.query.filter_by(
+                challenge_id=challenge.id, user_id=xid)           
         running_container = running_containers.first()
 
         # If a container is already running for the team, return it
@@ -264,14 +272,24 @@ def load(app: Flask):
         expires = int(time.time() + container_manager.expiration_seconds)
 
         # Insert the new container into the database
-        new_container = ContainerInfoModel(
-            container_id=created_container.id,
-            challenge_id=challenge.id,
-            team_id=team_id,
-            port=port,
-            timestamp=int(time.time()),
-            expires=expires
-        )
+        if is_team is True:
+            new_container = ContainerInfoModel(
+                container_id=created_container.id,
+                challenge_id=challenge.id,
+                team_id=xid,
+                port=port,
+                timestamp=int(time.time()),
+                expires=expires
+            )
+        else: 
+            new_container = ContainerInfoModel(
+                container_id=created_container.id,
+                challenge_id=challenge.id,
+                user_id=xid,
+                port=port,
+                timestamp=int(time.time()),
+                expires=expires
+            )
         db.session.add(new_container)
         db.session.commit()
 
@@ -283,7 +301,7 @@ def load(app: Flask):
             "expires": expires
         })
 
-    def view_container_info(chal_id, team_id):
+    def view_container_info(chal_id, xid, is_team):
         # Get the requested challenge
         challenge = ContainerChallenge.challenge_model.query.filter_by(
             id=chal_id).first()
@@ -293,8 +311,12 @@ def load(app: Flask):
             return {"error": "Challenge not found"}, 400
 
         # Check for any existing containers for the team
-        running_containers = ContainerInfoModel.query.filter_by(
-            challenge_id=challenge.id, team_id=team_id)
+        if is_team is True:
+            running_containers = ContainerInfoModel.query.filter_by(
+                challenge_id=challenge.id, team_id=xid)
+        else:
+            running_containers = ContainerInfoModel.query.filter_by(
+                challenge_id=challenge.id, user_id=xid)
         running_container = running_containers.first()
 
         # If a container is already running for the team, return it
@@ -367,9 +389,9 @@ def load(app: Flask):
 
         try:
             if is_team_mode() is True:
-                return view_container_info(request.json.get("chal_id"), user.team.id)
+                return view_container_info(request.json.get("chal_id"), user.team.id, True)
             elif is_team_mode() is False:
-                return view_container_info(request.json.get("chal_id"), user.id)
+                return view_container_info(request.json.get("chal_id"), user.id, False)
         except ContainerException as err:
             return {"error": str(err)}, 500
 
@@ -395,9 +417,9 @@ def load(app: Flask):
 
         try:
             if is_team_mode() is True:
-                return create_container(request.json.get("chal_id"), user.team.id)
+                return create_container(request.json.get("chal_id"), user.team.id,True)
             elif is_team_mode() is False:
-                return create_container(request.json.get("chal_id"), user.id)   
+                return create_container(request.json.get("chal_id"), user.id, False)   
         except ContainerException as err:
             return {"error": str(err)}, 500
 
@@ -423,18 +445,12 @@ def load(app: Flask):
 
         try:
             if is_team_mode() is True:
-                return renew_container(request.json.get("chal_id"), user.team.id)
+                return renew_container(request.json.get("chal_id"), user.team.id, True)
             elif is_team_mode() is False:
-                return renew_container(request.json.get("chal_id"), user.id)
+                return renew_container(request.json.get("chal_id"), user.id, False)
         except ContainerException as err:
             return {"error": str(err)}, 500
 
-    @containers_bp.route('/api/reset', methods=['POST'])
-    @authed_only
-    @during_ctf_time_only
-    @require_verified_emails
-    @ratelimit(method="POST", limit=6, interval=60)
-    def route_restart_container():
         user = get_current_user()
 
         # Validate the request
