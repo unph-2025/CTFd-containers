@@ -47,7 +47,7 @@
 			<div class="col-md-4">
 				<div class="form-group">
 					<select id="team-filter" class="form-control">
-						<option value="">All Teams</option>
+						<option value="">All Teams/Users</option>
 						<!-- Add options for teams dynamically based on your data -->
 					</select>
 				</div>
@@ -75,7 +75,7 @@
 				</td>
 				<td><strong>Challenge</strong>
 				</td>
-				<td><strong>Team</strong>
+				<td><strong>Team/User</strong>
 				</td>
 				<td><strong>Port</strong>
 				</td>
@@ -95,7 +95,11 @@
 				<td class="container_item" id="{{ c.container_id }}">{{ c.container_id[:12] }}</td>
 				<td>{{ c.challenge.image }}</td>
 				<td>{{ c.challenge.name }} [{{ c.challenge_id }}]</td>
-				<td>{{ c.team.name }} [{{ c.team_id }}]</td>
+				{% if c.team == None %}
+					<td>{{ c.user.name }} [{{ c.user_id }}]</td>
+				{% else %}
+					<td>{{ c.team.name }} [{{ c.team_id }}]</td>
+			   	{% endif %}
 				<td>{{ c.port }}</td>
 				<td>{{ c.timestamp|format_time }}</td>
 				<td>{{ c.expires|format_time }}</td>
@@ -135,18 +139,18 @@
 
 			// Populate the teams select
 			data.teams.forEach((team) => {
-			const option = document.createElement("option");
-			option.value = team;
-			option.text = team;
-			teamSelect.appendChild(option);
+				const option = document.createElement("option");
+				option.value = team;
+				option.text = team;
+				teamSelect.appendChild(option);
 			});
 
 			// Populate the challenges select
 			data.challenges.forEach((challenge) => {
-			const option = document.createElement("option");
-			option.value = challenge;
-			option.text = challenge;
-			challengeSelect.appendChild(option);
+				const option = document.createElement("option");
+				option.value = challenge;
+				option.text = challenge;
+				challengeSelect.appendChild(option);
 			});
 		})
 		.catch((error) => {
@@ -165,24 +169,38 @@
 		// Iterate through the containers in the JSON response
 		responseData.containers.forEach((container) => {
 			// Check if the container's team matches the selected team or if no team is selected
-			const isTeamMatch = selectedTeam === "" || container.team === selectedTeam;
+			const isTeamMatch = selectedTeam === "" || container.team === selectedTeam || container.user === selectedTeam;
 			const isChallengeMatch = selectedChallenge === "" || container.challenge === selectedChallenge;
 
 			if (isTeamMatch && isChallengeMatch) {
 				// Create a new table row and populate it with container data
 				const newRow = document.createElement("tr");
-				newRow.innerHTML = `
-					<td class="container_item" id="${container.container_id}">${container.container_id.slice(0, 12)}</td>
-					<td>${container.image}</td>
-					<td>${container.challenge}</td>
-					<td>${container.team}</td>
-					<td>${container.port}</td>
-					<td>${new Date(container.created * 1000).toLocaleString()}</td>
-					<td>${new Date(container.expires * 1000).toLocaleString()}</td>
-					<td><span class="badge badge-${container.is_running ? 'success' : 'danger'}">${container.is_running ? 'Yes' : 'No'}</span></td>
-					<td><button class="btn btn-danger containers-kill-btn" onclick="killContainer('${container.container_id}')"><i class="fa fa-times"></i></button></td>
-				`;
-
+				if (typeof container.team === 'undefined') {
+					newRow.innerHTML = `
+						<td class="container_item" id="${container.container_id}">${container.container_id.slice(0, 12)}</td>
+						<td>${container.image}</td>
+						<td>${container.challenge}</td>
+						<td>${container.user}</td>
+						<td>${container.port}</td>
+						<td>${new Date(container.created * 1000).toLocaleString()}</td>
+						<td>${new Date(container.expires * 1000).toLocaleString()}</td>
+						<td><span class="badge badge-${container.is_running ? 'success' : 'danger'}">${container.is_running ? 'Yes' : 'No'}</span></td>
+						<td><button class="btn btn-danger containers-kill-btn" onclick="killContainer('${container.container_id}')"><i class="fa fa-times"></i></button></td>
+					`;
+				} else {
+					newRow.innerHTML = `
+						<td class="container_item" id="${container.container_id}">${container.container_id.slice(0, 12)}</td>
+						<td>${container.image}</td>
+						<td>${container.challenge}</td>
+						<td>${container.team}</td>
+						<td>${container.port}</td>
+						<td>${new Date(container.created * 1000).toLocaleString()}</td>
+						<td>${new Date(container.expires * 1000).toLocaleString()}</td>
+						<td><span class="badge badge-${container.is_running ? 'success' : 'danger'}">${container.is_running ? 'Yes' : 'No'}</span></td>
+						<td><button class="btn btn-danger containers-kill-btn" onclick="killContainer('${container.container_id}')"><i class="fa fa-times"></i></button></td>
+					`;
+				}
+			
 				// Append the new row to the table body
 				containerTableBody.appendChild(newRow);
 			}

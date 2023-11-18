@@ -164,9 +164,9 @@ def load(app: Flask):
 
     @containers_bp.app_template_filter("format_time")
     def format_time_filter(unix_seconds):
-        # return time.ctime(unix_seconds)
-        return datetime.datetime.fromtimestamp(unix_seconds, tz=datetime.datetime.now(
-            datetime.timezone.utc).astimezone().tzinfo).isoformat()
+        dt = datetime.datetime.fromtimestamp(unix_seconds, tz=datetime.datetime.now(
+            datetime.timezone.utc).astimezone().tzinfo)
+        return dt.strftime("%H:%M:%S %d/%m/%Y")
 
     def kill_container(container_id):
         container: ContainerInfoModel = ContainerInfoModel.query.filter_by(
@@ -696,7 +696,10 @@ def load(app: Flask):
                 running_containers[i].is_running = False
 
             # Add team and challenge to the unique sets
-            unique_teams.add(f"{container.team.name} [{container.team_id}]")
+            if is_team_mode() is True:
+                unique_teams.add(f"{container.team.name} [{container.team_id}]")
+            else:   
+                unique_teams.add(f"{container.user.name} [{container.user_id}]")
             unique_challenges.add(f"{container.challenge.name} [{container.challenge_id}]")
 
         # Convert unique sets to lists
@@ -706,16 +709,28 @@ def load(app: Flask):
         # Create a list of dictionaries containing running_containers data
         running_containers_data = []
         for container in running_containers:
-            container_data = {
-                "container_id": container.container_id,
-                "image": container.challenge.image,
-                "challenge": f"{container.challenge.name} [{container.challenge_id}]",
-                "team": f"{container.team.name} [{container.team_id}]",
-                "port": container.port,
-                "created": container.timestamp,
-                "expires": container.expires,
-                "is_running": container.is_running
-            }
+            if is_team_mode() is True:
+                container_data = {
+                    "container_id": container.container_id,
+                    "image": container.challenge.image,
+                    "challenge": f"{container.challenge.name} [{container.challenge_id}]",
+                    "team": f"{container.team.name} [{container.team_id}]",
+                    "port": container.port,
+                    "created": container.timestamp,
+                    "expires": container.expires,
+                    "is_running": container.is_running
+                }
+            else:
+                container_data = {
+                    "container_id": container.container_id,
+                    "image": container.challenge.image,
+                    "challenge": f"{container.challenge.name} [{container.challenge_id}]",
+                    "user": f"{container.user.name} [{container.user_id}]",
+                    "port": container.port,
+                    "created": container.timestamp,
+                    "expires": container.expires,
+                    "is_running": container.is_running
+                }
             running_containers_data.append(container_data)
 
         # Create a JSON response containing running_containers_data, unique teams, and unique challenges
