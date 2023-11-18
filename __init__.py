@@ -512,7 +512,7 @@ def load(app: Flask):
             return {"error": "No container found"}, 400
         elif is_team_mode() is False:
             running_container: ContainerInfoModel = ContainerInfoModel.query.filter_by(
-                challenge_id=request.json.get("chal_id"), team_id=user.id).first()
+                challenge_id=request.json.get("chal_id"), user_id=user.id).first()
 
             if running_container:
                 return kill_container(running_container.container_id)
