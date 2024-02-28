@@ -1,59 +1,188 @@
-# CTFd Docker Containers Plugin
+<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
+<a name="readme-top"></a>
+<!--
+*** Thanks for checking out the Best-README-Template. If you have a suggestion
+*** that would make this better, please fork the repo and create a pull request
+*** or simply open an issue with the tag "enhancement".
+*** Don't forget to give the project a star!
+*** Thanks again! Now go create something AMAZING! :D
+-->
 
-This is a modified version of CTFd Docker Containers Plugin by [andyjsmith](https://github.com/andyjsmith). The original version can be found here [andyjsmith/CTFd-Docker-Plugin](https://github.com/andyjsmith/CTFd-Docker-Plugin)
 
-Work with both Team mode and User mode
 
-## Installation
+<!-- PROJECT SHIELDS -->
+<!--
+*** I'm using markdown "reference style" links for readability.
+*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
+*** See the bottom of this document for the declaration of the reference variables
+*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
+*** https://www.markdownguide.org/basic-syntax/#reference-style-links
+-->
 
-Configure CTFd:
-- Map docker socket into CTFd container by modifying the `docker-compose.yml` file:
-```docker
-services:
-  ctfd:
-    ...
-    volumes:
-    ...
-      - /var/run/docker.sock:/var/run/docker.sock
-    ...
-```
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
 
-Add plugin to CTFd:
-- Clone this repository
-- Rename "CTFd-Docker-Plugin" to "containers"
-- Place `containers` folder inside `CTFd/plugins` directory
+  <h3 align="center">CTFd Docker Containers Plugin</h3>
+  <p align="center">
+    A plugin that can create containerize challenges for your CTF contest 
+    <br />
+  </p>
+</div>
 
+
+
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Installation</a></li>
+      </ul>
+    </li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#demo">Demo</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ol>
+</details>
+
+
+
+<!-- ABOUT THE PROJECT -->
+## About The Project
+
+![](./image-readme/main.png)
+
+There are many great README templates available on GitHub; however, I didn't find one that really suited my needs so I created this enhanced one. I want to create a README template so amazing that it'll be the last one you ever need -- I think this is it.
+
+Here's why:
+* Your time should be focused on creating something amazing. A project that solves a problem and helps others
+* You shouldn't be doing the same tasks over and over like creating a README from scratch
+* You should implement DRY principles to the rest of your life :smile:
+
+Of course, no one template will serve all projects since your needs may be different. So I'll be adding more in the near future. You may also suggest changes by forking this repo and creating a pull request or opening an issue. Thanks to all the people have contributed to expanding this template!
+
+Use the `BLANK_README.md` to get started.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- GETTING STARTED -->
+## Getting Started
+
+This is an example of how you may give instructions on setting up your project locally.
+To get a local copy up and running follow these simple example steps.
+
+### Prerequisites
+
+To use this plugin you'll need  
+
+- Know how to host CTFd w Docker
+- Know how to use Docker
+
+### Installation
+
+
+1. Map docker socket into CTFd container by modifying the `docker-compose.yml` file:
+   ```docker
+    services:
+      ctfd:
+        ...
+        volumes:
+        ...
+          - /var/run/docker.sock:/var/run/docker.sock
+        ...
+   ```
+2. Clone this repository
+
+3. Rename "CTFd-Docker-Plugin" to "containers"
+
+4. Place `containers` folder inside `CTFd/plugins` directory
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+<!-- USAGE EXAMPLES -->
 ## Usage
 
-Connect to Docker daemon:
-- If the CTFd and the challenges host in the same machine, you just need to go to the plugin page in admin page, click on `Settings`, on this page just fill in other fields except the `Base URL` field.
+1. Connect to Docker daemon:
 
-  ![](https://cdn.discordapp.com/attachments/1120761462600777869/1149367147231985714/image.png)
+    If the CTFd and the challenges host in the same machine, you just need to go to the plugin settings page `/containers/settings` and fill in everything you need except the `Base URL` field.  
 
-- If you host the CTFd and the challenges in different machines, you need to follow the instructions one that page **I dont think its working XD, I'll try to fix that later**
+    ![](./image-readme/1.png)
 
+    If you host the CTFd and the challenges in different machines, you need to follow the instructions one that page **I dont think its working XD, I'll try to fix that later**
 
-Create the challenge:
+2. Create the challenge:
+    - Select `container` type and fill all the required fields
 
-- Select container type and fill all the required fields
+    ![](./image-readme/2.png)
 
-- If you want regular scoring for the challenge, set the maximum and minimum values to the same amount and the decay to zero.
+    - If you want regular scoring for the challenge, set the maximum and minimum values to the same amount and the decay to zero.
 
-- In the image field, it allows you to select the docker image already on the machine
+    - In the image field, it allows you to select the docker image already on the machine
 
-- In the `Connect type` field, it allows you to choose how to connect to the challenge such as via web or tcp
+    ![](./image-readme/3.png)
 
-  ![](https://cdn.discordapp.com/attachments/1120761462600777869/1175417115457617940/image.png)
+    - In the `Connect type` field, it allows you to choose how to connect to the challenge such as via web or tcp
 
+    ![](./image-readme/4.png)
 
-## Some demo
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+## Demo
 
+Admin can manage created containers, containers can also be filtered by challenge or player
+
+![](./image-readme/manage.png)
+
+**Challenge view**
 Web             |  TCP
 :-------------------------:|:-------------------------:
-![](https://cdn.discordapp.com/attachments/1120761462600777869/1149556744679325736/image.png) |  ![](https://cdn.discordapp.com/attachments/1120761462600777869/1149556787364777994/image.png)
+![](./image-readme/http.png) |  ![](./image-readme/tcp.png)
+
+![](./image-readme/demo.gif)
 
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- ROADMAP -->
+## Roadmap
+
+- [x] Make the plugin work in user mode
+- [x] Make the admin dashboard can filter by team/user or challenge
+- [x] Make the plugin work with core-beta theme
 
 
+See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+<!-- LICENSE -->
+## License
+
+Distributed under the MIT License. See `LICENSE.txt` for more information.
+
+Actually, this is just an upgrade of [andyjsmith's plugin](https://github.com/andyjsmith/CTFd-Docker-Plugin) that I upgraded by myself. I haven't worked much with the Licenses on github so it might be a violation. If you have anything please contact me by email below, I will respond within 2 days!
+
+Thanks again [andyjsmith](https://github.com/andyjsmith) for creating this base plugin!
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+<!-- CONTACT -->
+## Contact
+
+Phan Nhat - @Discord ftpotato - contact@phannhat.id.vn
+
+Project Link: [https://github.com/phannhat17/CTFd-Docker-Plugin](https://github.com/phannhat17/CTFd-Docker-Plugin)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
