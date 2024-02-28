@@ -7,6 +7,16 @@
 {% endblock %}
 
 {% block value %}
+<div class="form-group d-none">
+	<label>
+		Connection Info<br>
+		<small class="form-text text-muted">
+			Use this to specify a link, hostname, or connection instructions for your challenge.
+		</small>
+	</label>
+	<input type="text" class="form-control chal-connection-info" name="connection_info"
+		value="Container">
+</div>
 <div class="form-group">
 	<label for="value">Initial Value<br>
 		<small class="form-text text-muted">
