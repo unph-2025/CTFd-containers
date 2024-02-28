@@ -59,7 +59,7 @@ class ContainerChallenge(BaseChallenge):
             "decay": challenge.decay,
             "minimum": challenge.minimum,
             "description": challenge.description,
-            "connection_info": challenge.connection_info,
+            "connection_info": True,
             "category": challenge.category,
             "state": challenge.state,
             "max_attempts": challenge.max_attempts,
@@ -209,7 +209,7 @@ def load(app: Flask):
         except ContainerException:
             return {"error": "Database error occurred, please try again."}
 
-        return {"success": "Container reneweda", "expires": running_container.expires, "hostname": container_manager.settings.get("docker_hostname", ""), "port": running_container.port, "connect": challenge.ctype}
+        return {"success": "Container renewed", "expires": running_container.expires, "hostname": container_manager.settings.get("docker_hostname", ""), "port": running_container.port, "connect": challenge.ctype}
 
     def create_container(chal_id, xid, is_team):
         # Get the requested challenge

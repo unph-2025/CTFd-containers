@@ -12,7 +12,7 @@ CTFd._internal.challenge.submit = function (preview) {
 	var challenge_id = parseInt(CTFd.lib.$("#challenge-id").val());
 	var submission = CTFd.lib.$("#challenge-input").val();
 
-	let alert = resetAlert();
+    let alert = resetAlert();
 
 	var body = {
 		challenge_id: challenge_id,
@@ -52,23 +52,23 @@ function mergeQueryParams(parameters, queryParameters) {
 }
 
 function resetAlert() {
-    let alert = $(".deployment-actions > .alert").first();
-    alert.empty();
-    alert.removeClass("alert-danger");
+    let alert = document.getElementById("deployment-info");
+    alert.innerHTML = "";
+    alert.classList.remove("alert-danger");
     return alert;
 }
 
 function toggleChallengeCreate() {
-    let btn = $(".create-chal").first();
-    btn.toggleClass('d-none');
+    let btn = document.getElementById("create-chal");
+    btn.classList.toggle('d-none');
 }
 
 function toggleChallengeUpdate() {
-    let btn = $(".extend-chal").first();
-    btn.toggleClass('d-none');
+    let btn = document.getElementById("extend-chal");
+    btn.classList.toggle('d-none');
 
-    btn = $(".terminate-chal").first();
-    btn.toggleClass('d-none');
+    btn = document.getElementById("terminate-chal");
+    btn.classList.toggle('d-none');
 }
 
 function calculateExpiry(date) {
@@ -101,9 +101,10 @@ function createChallengeLinkElement(data, parent) {
 }
 
 function view_container_info(challenge_id) {
-    let alert = resetAlert();
+    resetAlert();
     var path = "/containers/api/view_info";
-
+    
+    let alert = document.getElementById("deployment-info");
     fetch(path, {
         method: "POST",
         headers: {
@@ -118,18 +119,23 @@ function view_container_info(challenge_id) {
         if (data.status == "Challenge not started") {
             alert.append(data.status);
             toggleChallengeCreate();
-        } else {
+        } else if (data.status == "already_running") {
             // Success
             createChallengeLinkElement(data, alert);
             toggleChallengeUpdate();
+            console.log(data);
+        } else {
+            resetAlert();
+            alert.append(data.message);
+            alert.classList.toggle('alert-danger');
+            toggleChallengeUpdate();
+            console.log(data);
         }
-        console.log(data);
     })
     .catch(error => {
         console.error("Fetch error:", error);
     });
 }
-
 
 function container_request(challenge_id) {
     var path = "/containers/api/request";
@@ -149,10 +155,12 @@ function container_request(challenge_id) {
         if (data.error !== undefined) {
             // Container error
             alert.append(data.error);
+            alert.classList.toggle('alert-danger');
             toggleChallengeCreate();
         } else if (data.message !== undefined) {
             // CTFd error
             alert.append(data.message);
+            alert.classList.toggle('alert-danger');
             toggleChallengeCreate();
         } else {
             // Success
@@ -185,10 +193,12 @@ function container_renew(challenge_id) {
         if (data.error !== undefined) {
             // Container error
             alert.append(data.error);
+            alert.classList.toggle('alert-danger');
             toggleChallengeCreate();
         } else if (data.message !== undefined) {
             // CTFd error
             alert.append(data.message);
+            alert.classList.toggle('alert-danger');
             toggleChallengeCreate();
         } else {
             // Success
@@ -219,10 +229,12 @@ function container_stop(challenge_id) {
         if (data.error !== undefined) {
             // Container error
             alert.append(data.error);
+            alert.classList.toggle('alert-danger');
             toggleChallengeCreate();
         } else if (data.message !== undefined) {
             // CTFd error
             alert.append(data.message);
+            alert.classList.toggle('alert-danger');
             toggleChallengeCreate();
         } else {
             // Success
