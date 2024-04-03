@@ -277,6 +277,7 @@ def load(app: Flask):
                 container_id=created_container.id,
                 challenge_id=challenge.id,
                 team_id=xid,
+                user_id=uid,
                 port=port,
                 timestamp=int(time.time()),
                 expires=expires

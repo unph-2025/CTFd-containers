@@ -67,6 +67,8 @@
     </div>
 
 	<table class="table">
+		{% if containers %}
+		{% for c in containers %}
 		<thead>
 			<tr>
 				<td><strong>Container ID</strong>
@@ -75,8 +77,12 @@
 				</td>
 				<td><strong>Challenge</strong>
 				</td>
-				<td><strong>Team/User</strong>
-				</td>
+				{% if c.team == None %}
+				<td><strong>User</strong></td>
+				{% else %}
+				<td><strong>User</strong></td>
+				<td><strong>Team</strong></td>
+				{% endif %}
 				<td><strong>Port</strong>
 				</td>
 				<td><strong>Created</strong>
@@ -89,8 +95,7 @@
 			</tr>
 		</thead>
 		<tbody id="container-table-body">
-			{% if containers %}
-			{% for c in containers %}
+			
 			<tr>
 				<td class="container_item" id="{{ c.container_id }}">{{ c.container_id[:12] }}</td>
 				<td>{{ c.challenge.image }}</td>
@@ -112,9 +117,9 @@
 				<td><button class="btn btn-danger containers-kill-btn"
 						onclick="killContainer('{{ c.container_id }}')"><i class="fa fa-times"></i></button></td>
 			</tr>
-			{% endfor %}
-			{% endif %}
 		</tbody>
+		{% endfor %}
+		{% endif %}
 	</table>
 </div>
 
@@ -193,8 +198,8 @@
 						<td class="container_item" id="${container.container_id}">${container.container_id.slice(0, 12)}</td>
 						<td>${container.image}</td>
 						<td>${container.challenge}</td>
-						<td>${container.team}</td>
 						<td>${container.user}</td>
+						<td>${container.team}</td>
 						<td>${container.port}</td>
 						<td>${new Date(container.created * 1000).toLocaleString()}</td>
 						<td>${new Date(container.expires * 1000).toLocaleString()}</td>
