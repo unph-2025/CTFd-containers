@@ -220,6 +220,15 @@ def load(app: Flask):
         if challenge is None:
             return {"error": "Challenge not found"}, 400
 
+        # Check if user already has MAX_CONTAINERS_ALLOWED number running containers.
+        MAX_CONTAINERS_ALLOWED = 4
+        if not is_team: uid = xid
+        t_containers = ContainerInfoModel.query.filter_by(
+            user_id=uid)
+
+        if t_containers.count() >= MAX_CONTAINERS_ALLOWED:
+            return { "error": f"You can only spawn {MAX_CONTAINERS_ALLOWED} containers at a time. Please stop other containers to continue" }, 500
+
         # Check for any existing containers for the team
         if is_team is True:
             running_containers = ContainerInfoModel.query.filter_by(
