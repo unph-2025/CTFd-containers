@@ -98,6 +98,7 @@
 				{% if c.team == None %}
 					<td>{{ c.user.name }} [{{ c.user_id }}]</td>
 				{% else %}
+					<td>{{ c.user.name }} [{{ c.user_id }}]</td> 
 					<td>{{ c.team.name }} [{{ c.team_id }}]</td>
 			   	{% endif %}
 				<td>{{ c.port }}</td>
@@ -193,6 +194,7 @@
 						<td>${container.image}</td>
 						<td>${container.challenge}</td>
 						<td>${container.team}</td>
+						<td>${container.user}</td>
 						<td>${container.port}</td>
 						<td>${new Date(container.created * 1000).toLocaleString()}</td>
 						<td>${new Date(container.expires * 1000).toLocaleString()}</td>

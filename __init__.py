@@ -211,7 +211,7 @@ def load(app: Flask):
 
         return {"success": "Container renewed", "expires": running_container.expires, "hostname": container_manager.settings.get("docker_hostname", ""), "port": running_container.port, "connect": challenge.ctype}
 
-    def create_container(chal_id, xid, is_team):
+    def create_container(chal_id, xid, uid, is_team):
         # Get the requested challenge
         challenge = ContainerChallenge.challenge_model.query.filter_by(
             id=chal_id).first()
@@ -255,7 +255,7 @@ def load(app: Flask):
         # Run a new Docker container
         try:
             created_container = container_manager.create_container(
-                challenge.image, challenge.port, challenge.command, challenge.volumes)
+                chal_id, xid, uid, challenge.image, challenge.port, challenge.command, challenge.volumes)
         except ContainerException as err:
             return {"error": str(err)}
 
@@ -360,7 +360,7 @@ def load(app: Flask):
     @authed_only
     @during_ctf_time_only
     @require_verified_emails
-    @ratelimit(method="GET", limit=15, interval=60)
+    @ratelimit(method="GET", limit=500, interval=10)
     def get_connect_type(challenge_id):
         try:
             return connect_type(challenge_id)
@@ -371,7 +371,7 @@ def load(app: Flask):
     @authed_only
     @during_ctf_time_only
     @require_verified_emails
-    @ratelimit(method="POST", limit=15, interval=60)
+    @ratelimit(method="POST", limit=500, interval=10)
     def route_view_info():
         user = get_current_user()
 
@@ -399,7 +399,7 @@ def load(app: Flask):
     @authed_only
     @during_ctf_time_only
     @require_verified_emails
-    @ratelimit(method="POST", limit=6, interval=60)
+    @ratelimit(method="POST", limit=500, interval=10)
     def route_request_container():
         user = get_current_user()
 
@@ -417,9 +417,9 @@ def load(app: Flask):
 
         try:
             if is_team_mode() is True:
-                return create_container(request.json.get("chal_id"), user.team.id,True)
+                return create_container(request.json.get("chal_id"), user.team.id, user.id,True)
             elif is_team_mode() is False:
-                return create_container(request.json.get("chal_id"), user.id, False)   
+                return create_container(request.json.get("chal_id"), user.id, user.id, False)   
         except ContainerException as err:
             return {"error": str(err)}, 500
 
@@ -427,7 +427,7 @@ def load(app: Flask):
     @authed_only
     @during_ctf_time_only
     @require_verified_emails
-    @ratelimit(method="POST", limit=6, interval=60)
+    @ratelimit(method="POST", limit=500, interval=10)
     def route_renew_container():
         user = get_current_user()
 
@@ -472,7 +472,7 @@ def load(app: Flask):
             if running_container:
                 kill_container(running_container.container_id)
 
-            return create_container(request.json.get("chal_id"), user.team.id)
+            return create_container(request.json.get("chal_id"), user.team.id, user.id, True)
         elif is_team_mode() is False:
             running_container: ContainerInfoModel = ContainerInfoModel.query.filter_by(
                 challenge_id=request.json.get("chal_id"), team_id=user.id).first()
@@ -480,13 +480,13 @@ def load(app: Flask):
             if running_container:
                 kill_container(running_container.container_id)
 
-            return create_container(request.json.get("chal_id"), user.id)
+            return create_container(request.json.get("chal_id"), user.id, None, False)
 
     @containers_bp.route('/api/stop', methods=['POST'])
     @authed_only
     @during_ctf_time_only
     @require_verified_emails
-    @ratelimit(method="POST", limit=10, interval=60)
+    @ratelimit(method="POST", limit=500, interval=10)
     def route_stop_container():
         user = get_current_user()
 
@@ -715,6 +715,7 @@ def load(app: Flask):
                     "image": container.challenge.image,
                     "challenge": f"{container.challenge.name} [{container.challenge_id}]",
                     "team": f"{container.team.name} [{container.team_id}]",
+                    "user": f"{container.user.name} [{container.user_id}]",
                     "port": container.port,
                     "created": container.timestamp,
                     "expires": container.expires,

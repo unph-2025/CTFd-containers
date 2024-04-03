@@ -143,7 +143,7 @@ class ContainerManager:
         return container[0].status == "running"
 
     @run_command
-    def create_container(self, image: str, port: int, command: str, volumes: str):
+    def create_container(self, chal_id: str, team_id: str, user_id: str, image: str, port: int, command: str, volumes: str):
         kwargs = {}
 
         # Set the memory and CPU limits for the container
@@ -180,6 +180,7 @@ class ContainerManager:
                 command=command,
                 detach=True,
                 auto_remove=True,
+                environment={"CHALLENGE_ID": chal_id, "TEAM_ID": team_id, "USER_ID": user_id},
                 **kwargs
             )
         except docker.errors.ImageNotFound:
