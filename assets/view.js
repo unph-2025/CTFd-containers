@@ -120,7 +120,7 @@ function view_container_info(challenge_id) {
     })
     .then(response => response.json())
     .then(data => {
-        if (data.status == "Challenge not started") {
+        if (data.status == "Suffering hasn't begun") {
             alert.append(data.status);
             toggleChallengeCreate();
         } else if (data.status == "already_running") {

@@ -349,7 +349,7 @@ def load(app: Flask):
             except ContainerException as err:
                 return {"error": str(err)}, 500
         else:
-            return {"status": "Challenge not started"}
+            return {"status": "Suffering hasn't begun"}
 
     def connect_type(chal_id):
         # Get the requested challenge
