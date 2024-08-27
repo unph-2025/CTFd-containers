@@ -26,7 +26,6 @@ fetch(path, {
             containerImage.removeAttribute("disabled");
             containerImage.value = container_image_selected;
         }
-        console.log(data);
     })
     .catch(error => {
         console.error("Fetch error:", error);
@@ -56,12 +55,10 @@ if (match && match[1]) {
                 console.error("Error:", connectTypeData.error);
             } else {
                 var connectTypeValue = connectTypeData.connect;
-
                 connectTypeDefault.innerHTML = "Choose...";
                 connectType.removeAttribute("disabled");
                 connectType.value = connectTypeValue;
             }
-            console.log(connectTypeData);
         })
         .catch(error => {
             console.error("Fetch error:", error);

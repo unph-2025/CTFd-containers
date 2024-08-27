@@ -14,6 +14,7 @@
 {% endblock %}
 
 {% block value %}
+
 <div class="form-group">
 	<label for="value">Current Value<br>
 		<small class="form-text text-muted">
@@ -81,6 +82,28 @@
 		<option value="ssh">SSH</option>
 	</select>
 </div>
+
+{% if challenge.ctype == "ssh" %}
+	<div class="form-group">
+		<label>
+			SSH Username<br>
+			<small class="form-text text-muted">
+				Username that will be used to connect to the SSH machine [Only shown if connect type is SSH]
+			</small>
+		</label>
+		<input type="text" class="form-control" name="ssh_username" value="{{ challenge.ssh_username }}" placeholder="Enter username or leave blank">
+	</div>
+
+	<div class="form-group">
+		<label>
+			SSH Password<br>
+			<small class="form-text text-muted">
+				Password that will be used to connect to the SSH machine [Only shown if connect type is SSH]
+			</small>
+		</label>
+		<input type="password" class="form-control" name="ssh_password" value="{{ challenge.ssh_password }}" placeholder="Enter password or leave blank">
+	</div>
+{% endif %}
 
 <div class="form-group">
 	<label>

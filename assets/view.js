@@ -93,7 +93,12 @@ function createChallengeLinkElement(data, parent) {
 		parent.append(codeElement);
     } else if(data.connect == "ssh") {
         let codeElement = document.createElement('code');
-		codeElement.textContent = 'ssh <user>@' + data.hostname + " -p" + data.port;
+        // In case you have to get the password from other sources
+        if(data.ssh_password == null) {
+            codeElement.textContent = 'ssh -o StrictHostKeyChecking=no ' + data.ssh_username + '@' + data.hostname + " -p" + data.port;
+        } else {
+		    codeElement.textContent = 'sshpass -p' + data.ssh_password + " ssh -o StrictHostKeyChecking=no " + data.ssh_username + '@' + data.hostname + " -p" + data.port;
+        }
 		parent.append(codeElement);
 	} else {
 		let link = document.createElement('a');
@@ -127,13 +132,11 @@ function view_container_info(challenge_id) {
             // Success
             createChallengeLinkElement(data, alert);
             toggleChallengeUpdate();
-            console.log(data);
         } else {
             resetAlert();
             alert.append(data.message);
             alert.classList.toggle('alert-danger');
             toggleChallengeUpdate();
-            console.log(data);
         }
     })
     .catch(error => {
@@ -172,7 +175,6 @@ function container_request(challenge_id) {
             toggleChallengeUpdate();
             toggleChallengeCreate();
         }
-        console.log(data);
     })
     .catch(error => {
         console.error("Fetch error:", error);
@@ -208,7 +210,6 @@ function container_renew(challenge_id) {
             // Success
             createChallengeLinkElement(data, alert);
         }
-        console.log(data);
     })
     .catch(error => {
         console.error("Fetch error:", error);
@@ -246,7 +247,6 @@ function container_stop(challenge_id) {
             toggleChallengeCreate();
             toggleChallengeUpdate();
         }
-        console.log(data);
     })
     .catch(error => {
         console.error("Fetch error:", error);
