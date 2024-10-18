@@ -52,7 +52,8 @@ class ContainerManager:
             s.bind(("0.0.0.0", port))
             s.close()
             return True
-        except Exception as e: pass
+        except Exception as e:
+            print(f"Error when fetching port: {e}")
         return False
 
     def initialize_connection(self, settings, app) -> None:
@@ -75,6 +76,7 @@ class ContainerManager:
                 base_url=settings.get("docker_base_url"))
         except (docker.errors.DockerException) as e:
             self.client = None
+            print(f"Error: {e}")
             raise ContainerException("CTFd could not connect to Docker")
         except TimeoutError as e:
             self.client = None
@@ -185,10 +187,11 @@ class ContainerManager:
             except json.decoder.JSONDecodeError:
                 raise ContainerException("Volumes JSON string is invalid")
 
-        external_port = port
+        external_port = random.randint(port, 65535)
         while not self.__check_port__(external_port):
             external_port = random.randint(port, 65535)
 
+        print(f"Using {external_port} as the external port for challenge {chal_id} for team {team_id} spawned by {user_id}")
         try:
             return self.client.containers.run(
                 image,
